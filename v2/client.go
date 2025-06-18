@@ -671,12 +671,15 @@ func (c *client) createDefaultRequest(q Query) (*http.Request, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", u.String(), nil)
+	body := url.Values{}
+	body.Set("q", q.Command)
+
+	req, err := http.NewRequest("POST", u.String(), strings.NewReader(body.Encode()))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Content-Type", "")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", c.useragent)
 
 	if c.username != "" {
@@ -684,7 +687,6 @@ func (c *client) createDefaultRequest(q Query) (*http.Request, error) {
 	}
 
 	params := req.URL.Query()
-	params.Set("q", q.Command)
 	params.Set("db", q.Database)
 	if q.RetentionPolicy != "" {
 		params.Set("rp", q.RetentionPolicy)
